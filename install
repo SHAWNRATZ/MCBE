@@ -1,0 +1,113 @@
+#!/bin/bash
+start=1
+antal=8
+
+start1=1
+antal1=8
+
+start2=1
+antal2=8
+
+start3=1
+antal3=8
+
+start4=1
+antal4=8
+
+#FTP CONNECTION
+HOST='172.27.99.110'
+USER='MC'
+PASSWORD='P@ssw0rd'
+
+#LOCAL
+DIRECTORY=/home/MC$start
+pass='mcserver'
+clear
+
+sudo dpkg --add-architecture i386; sudo apt-get update;sudo apt-get install mailutils postfix curl wget file bzip2 gzip unzip bsdmainutils python util-linux ca-certificates tmux default-jdk; sudo apt-get install binutils
+
+	while [ $start -le $antal ]
+	do
+		useradd MC$start
+		echo MC$start:$pass | chpasswd
+		mkdir /home/MC$start
+		chown MC$start /home/MC$start
+		cd /home/MC$start
+		echo 'USER' 'MC'$start 'IS ADDED'
+		echo
+		su -c wget\ -N\ --no-check-certificate\ https://gameservermanagers.com/dl/linuxgsm.sh
+		chmod +x /home/MC$start/linuxgsm.sh MC$start 
+		su -c ./linuxgsm.sh\ mcserver MC$start
+		((start++))
+	done
+	
+	clear
+	echo
+	echo
+	echo ALL LGSM FILES ARE DOWNLOADED
+	echo 
+	echo
+	
+	while [ $start1 -le $antal1 ]
+	do
+		cd /home/MC$start1
+		su -c ./mcserver\ auto-install MC$start1
+		((start1++))
+	done
+	
+	
+
+	while [ $start2 -le $antal2 ]
+	do
+		echo >> /home/MC$start2/lgsm/config-lgsm/mcserver/mcserver.cfg
+		echo 'javaram="9216" # -Xmx$9216M' >> /home/MC$start2/lgsm/config-lgsm/mcserver/mcserver.cfg
+		echo 'executable="java -Xmx${javaram}M -jar ${serverfiles}/minecraft_server.jar"' >> /home/MC$start2/lgsm/config-lgsm/mcserver/mcserver.cfg
+		((start2++))
+	done
+	
+	
+	while [ $start4 -le $antal4 ]
+	do
+		cd /home/MC$start4
+		rm -rf serverfiles
+		lftp -u "$USER","$PASSWORD" $HOST <<EOF
+		mirror --use-pget-n=10 server/MC$start4/serverfiles;
+		exit
+EOF
+	((start4++))
+	done
+	
+	useradd BC
+	echo BC:$pass | chpasswd
+	echo 'USER BC IS NOW ADDED'
+	cd /home
+	lftp -u "$USER","$PASSWORD" $HOST <<EOF
+	mirror --use-pget-n=10 server/BC;
+	exit
+EOF
+	echo java -jar BungeeCord.jar >> /home/BC/CONN
+	chmod +x /home/BC/CONN
+	tmux new -s bungee -d
+	tmux send -t bungee cd\ /home/BC ENTER
+	tmux send -t bungee echo ENTER
+	tmux send -t bungee ./CONN ENTER
+	echo 'CONNECTOR STARTING NOW!'
+	
+	
+	
+	while [ $start3 -le $antal3 ]
+	do
+		echo
+		echo
+		chown -R MC$start3 /home/MC$start3
+		cd /home/MC$start3
+		su MC$start3 -c ./mcserver\ start 
+		((start3++))
+	done
+	
+	tmux new -s backup
+	tmux send -t backup echo\ STARTING BACKUP
+	tmux send -t backup ./backup ENTER
+	
+	
+	

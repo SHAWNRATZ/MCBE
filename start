@@ -1,0 +1,31 @@
+#!/bin/bash
+
+start=1
+antal=8
+
+#if [ -z $1 ]; then
+#	start=0
+#fi
+
+#if [ -z $2 ]; then
+#	antal=1
+#fi
+
+
+
+while [ $start -le $antal ]
+do
+	cd /home/MC$start || exit
+	su -c /home/MC$start/mcserver\ start MC$start
+	((start++))
+done
+
+	tmux new -s bungee -d
+	tmux send -t bungee cd\ /home/BC ENTER
+	tmux send -t bungee echo ENTER
+	tmux send -t bungee ./CONN ENTER
+	tmux new -s backup -d
+	tmux send -t backup cd ENTER
+	tmux send -t backup cd ENTER
+	tmux send -t backup ./backup ENTER
+	

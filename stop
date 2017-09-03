@@ -1,0 +1,22 @@
+#!/bin/bash
+
+start=1
+antal=8
+
+#if [ -z $1 ]; then
+#	start=0
+#fi
+
+#if [ -z $2 ]; then
+#	antal=1
+#fi
+
+
+
+while [ $start -le $antal ]
+do
+	chmod -R MC$start /home/MC$start
+	cd /home/MC$start || exit
+	su MC$start -c ./mcserver\ stop 
+	((start++))
+done
