@@ -1,0 +1,155 @@
+#!/bin/bash
+stty echo
+start=1
+antal=8
+
+#FTP CONNECTION
+HOST='172.27.99.110'
+USER='MC'
+PASSWORD='P@ssw0rd'
+
+#MYSQL INFORMATION
+user="root"
+password="P@ssw0rd"
+host="localhost"
+db_name="pex"
+backup_path="/mysql"
+
+
+#BACKUP THE SERVERFILES
+cd /home
+clear	
+echo "STARTING BACKUP NOW"
+
+	
+#REMOVING ALL THE DIRECTORIES
+if lftp -u "$USER","$PASSWORD" $HOST <<EOF 2> /berr.txt ; then
+	cd old
+	rm -rf /old/MC1
+	rm -rf /old/MC2
+	rm -rf /old/MC3
+	rm -rf /old/MC4
+	rm -rf /old/MC5
+	rm -rf /old/MC6
+	rm -rf /old/MC7
+	rm -rf /old/MC8
+	rm -rf /old/BC
+	rm -rf /old/mysql
+	exit
+EOF
+
+echo -e "{\e[32mSUCESS\e[39m} REMOVED ALL FILES"
+
+else
+
+   echo -e "{\e[91mFAIL\e[39m} SOMETHING WENT WRONG AND ERRORS ARE PRINTED TO /BERR.TXT"
+
+fi
+
+#CREATING THE DIRECTORIES
+if lftp -u "$USER","$PASSWORD" $HOST <<EOF 2> /berr.txt ; then
+	cd old
+	mkdir /old/MC1
+	mkdir /old/MC1/serverfiles
+	mkdir /old/MC2
+	mkdir /old/MC2/serverfiles
+	mkdir /old/MC3
+	mkdir /old/MC3/serverfiles
+	mkdir /old/MC4
+	mkdir /old/MC4/serverfiles
+	mkdir /old/MC5
+	mkdir /old/MC5/serverfiles
+	mkdir /old/MC6
+	mkdir /old/MC6/serverfiles
+	mkdir /old/MC7
+	mkdir /old/MC7/serverfiles
+	mkdir /old/MC8
+	mkdir /old/MC8/serverfiles
+	mkdir /old/BC
+	mkdir /old/mysql
+	exit
+EOF
+
+echo -e "{\e[32mSUCESS\e[39m} RCREATED THE DIRECTORIES"
+
+else
+
+   echo -e "{\e[91mFAIL\e[39m} SOMETHING WENT WRONG AND ERRORS ARE PRINTED TO /BERR.TXT"
+
+fi
+
+
+
+#REMOVING THE OLD MYSQL FOLDER
+rm -rf /mysql
+mkdir /mysql
+
+
+
+#UPLOADING THE BACKUP
+if mysqldump --user=$user --password=$password --host=$host $db_name > $backup_path/$db_name.sql 2> /berr.txt ; then
+
+echo -e "{\e[32mSUCESS\e[39m} MYSQL BACKUP HAS BEEN MADE IN /MYSQL"
+
+else
+
+   echo -e "{\e[91mFAIL\e[39m} SOMETHING WENT WRONG AND ERRORS ARE PRINTED TO /BERR.TXT"
+
+fi
+
+
+
+#UPLOADING THE BACKUP
+if lftp -u "$USER","$PASSWORD" $HOST <<EOF 2>/berr.txt ; then
+	mirror -R /home/MC1/serverfiles /old/MC1/serverfiles
+	mirror -R /home/MC2/serverfiles /old/MC2/serverfiles
+	mirror -R /home/MC3/serverfiles /old/MC3/serverfiles
+	mirror -R /home/MC4/serverfiles /old/MC4/serverfiles
+	mirror -R /home/MC5/serverfiles /old/MC5/serverfiles
+	mirror -R /home/MC6/serverfiles /old/MC6/serverfiles
+	mirror -R /home/MC7/serverfiles /old/MC7/serverfiles
+	mirror -R /home/MC8/serverfiles /old/MC8/serverfiles
+	mirror -R /home/BC /old/BC
+	mirror -R /mysql /old/mysql
+	exit
+EOF
+
+echo -e "{\e[32mSUCESS\e[39m} FILES ARE NOW UPLOADED"
+
+else
+
+   echo -e "{\e[91mFAIL\e[39m} SOMETHING WENT WRONG AND ERRORS ARE PRINTED TO /BERR.TXT"
+
+fi
+
+	
+echo -e "FTP IP: \e[91m$HOST\e[39m";
+	
+	stty -echo
+	date=$(date +"%d-%b-%Y")
+	seconds=7200
+	date1=$((`date +%s` + $seconds))
+	
+	while [ "$date1" -ge `date +%s` ]; do 
+		echo -ne "BACKUP WILL RUN IN:  $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r"; 
+	done
+	
+	cd
+
+	./backup2
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
